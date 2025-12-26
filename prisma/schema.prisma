@@ -1,0 +1,512 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ========================================
+// ENUMS
+// ========================================
+
+enum Role {
+  SUPER_ADMIN  // Equipo de desarrollo
+  OWNER        // Cliente/Profesor dueño del sitio
+  STUDENT      // Estudiante/Comprador
+}
+
+enum StudentStatus {
+  REGISTERED       // Solo registrado
+  IN_CART          // Tiene curso en carrito
+  PENDING_PAYMENT  // Inició checkout, pago pendiente
+  PAID             // Pagó al menos un curso
+  IN_PROGRESS      // Cursando activamente
+  COMPLETED        // Completó todos sus cursos
+}
+
+enum AuthProvider {
+  LOCAL   // Email/Password
+  GOOGLE  // Google OAuth
+}
+
+enum PaymentStatus {
+  PENDING   // Esperando pago
+  APPROVED  // Aprobado
+  REJECTED  // Rechazado
+  REFUNDED  // Reembolsado
+}
+
+enum OrderStatus {
+  PENDING    // Orden creada, esperando pago
+  COMPLETED  // Pago confirmado
+  CANCELLED  // Orden cancelada
+  REFUNDED   // Reembolsada
+}
+
+enum CouponType {
+  PERCENTAGE  // Descuento porcentual
+  FIXED       // Monto fijo
+}
+
+enum MessageStatus {
+  UNREAD      // No leído
+  READ        // Leído
+  ANSWERED    // Respondido
+  ARCHIVED    // Archivado
+}
+
+// ========================================
+// MODELOS
+// ========================================
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String?        // Nullable para OAuth
+  firstName     String
+  lastName      String
+  phone         String?
+  dni           String?        // Documento de identidad
+  birthDate     DateTime?
+  avatarUrl     String?
+  role          Role           @default(STUDENT)
+  studentStatus StudentStatus  @default(REGISTERED)
+  authProvider  AuthProvider   @default(LOCAL)
+  googleId      String?        @unique
+  isActive      Boolean        @default(true)
+  emailVerified Boolean        @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relaciones
+  cartItems       CartItem[]
+  orders          Order[]
+  payments        Payment[]
+  refreshTokens   RefreshToken[]
+  courseProgress  CourseProgress[]
+  lessonProgress  LessonProgress[]
+  reviews         Review[]
+  messages        Message[]
+  passwordResets  PasswordReset[]
+  emailVerifications EmailVerification[]
+  couponsUsed     CouponUsage[]
+  notifications   Notification[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  isRevoked Boolean  @default(false)
+
+  @@map("refresh_tokens")
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@map("password_resets")
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@map("email_verifications")
+}
+
+// ========================================
+// CURSOS
+// ========================================
+
+model Course {
+  id               String   @id @default(uuid())
+  title            String
+  slug             String   @unique
+  shortDescription String   @db.Text
+  longDescription  String   @db.Text
+  price            Decimal  @db.Decimal(10, 2)
+  discountPrice    Decimal? @db.Decimal(10, 2)
+  thumbnailUrl     String?
+  previewVideoUrl  String?
+  duration         Int?     // Duración total en minutos
+  level            String?  // Principiante, Intermedio, Avanzado
+  language         String   @default("Español")
+  isPublished      Boolean  @default(false)
+  isFeatured       Boolean  @default(false)
+  order            Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relaciones
+  modules         Module[]
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+  reviews         Review[]
+  courseProgress  CourseProgress[]
+  categories      CourseCategory[]
+  coupons         CourseCoupon[]
+
+  @@map("courses")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  courses CourseCategory[]
+
+  @@map("categories")
+}
+
+model CourseCategory {
+  courseId   String
+  categoryId String
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, categoryId])
+  @@map("course_categories")
+}
+
+model Module {
+  id          String   @id @default(uuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessons Lesson[]
+
+  @@map("modules")
+}
+
+model Lesson {
+  id          String   @id @default(uuid())
+  moduleId    String
+  module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title       String
+  description String?  @db.Text
+  videoUrl    String?
+  duration    Int?     // Duración en minutos
+  content     String?  @db.Text  // Contenido adicional (markdown)
+  resources   Json?    // Links a recursos descargables
+  order       Int      @default(0)
+  isFree      Boolean  @default(false)  // Lección gratuita de preview
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessonProgress LessonProgress[]
+
+  @@map("lessons")
+}
+
+// ========================================
+// PROGRESO
+// ========================================
+
+model CourseProgress {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId        String
+  course          Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progressPercent Int       @default(0)  // 0-100
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  lastAccessedAt  DateTime  @default(now())
+
+  @@unique([userId, courseId])
+  @@map("course_progress")
+}
+
+model LessonProgress {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  watchTime   Int       @default(0)  // Tiempo visto en segundos
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, lessonId])
+  @@map("lesson_progress")
+}
+
+// ========================================
+// CARRITO Y ÓRDENES
+// ========================================
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  addedAt   DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@map("cart_items")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          OrderStatus @default(PENDING)
+  subtotal        Decimal     @db.Decimal(10, 2)
+  discountAmount  Decimal     @default(0) @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+  currency        String      @default("ARS")
+  couponId        String?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
+  customerEmail   String
+  customerPhone   String?
+  customerDni     String?
+  notes           String?     @db.Text
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  items    OrderItem[]
+  payments Payment[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course  @relation(fields: [courseId], references: [id])
+  price     Decimal @db.Decimal(10, 2)  // Precio al momento de compra
+  title     String  // Título al momento de compra
+
+  @@map("order_items")
+}
+
+// ========================================
+// PAGOS
+// ========================================
+
+model Payment {
+  id                    String        @id @default(uuid())
+  orderId               String
+  order                 Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId                String
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mercadoPagoId         String?       @unique  // ID de MercadoPago
+  mercadoPagoPreference String?       // Preference ID
+  status                PaymentStatus @default(PENDING)
+  amount                Decimal       @db.Decimal(10, 2)
+  currency              String        @default("ARS")
+  paymentMethod         String?       // credit_card, debit_card, etc.
+  paymentType           String?       // visa, mastercard, etc.
+  installments          Int?          // Cuotas
+  paidAt                DateTime?
+  rawWebhook            Json?         // Respuesta completa de MercadoPago
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+// ========================================
+// CUPONES
+// ========================================
+
+model Coupon {
+  id              String     @id @default(uuid())
+  code            String     @unique
+  type            CouponType
+  value           Decimal    @db.Decimal(10, 2)  // Porcentaje o monto fijo
+  minPurchase     Decimal?   @db.Decimal(10, 2)  // Compra mínima requerida
+  maxDiscount     Decimal?   @db.Decimal(10, 2)  // Descuento máximo (para porcentaje)
+  maxUses         Int?       // Límite total de usos
+  maxUsesPerUser  Int        @default(1)  // Límite por usuario
+  currentUses     Int        @default(0)
+  validFrom       DateTime   @default(now())
+  validUntil      DateTime?
+  isActive        Boolean    @default(true)
+  description     String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Relaciones
+  orders         Order[]
+  usages         CouponUsage[]
+  courses        CourseCoupon[]  // Cupones específicos para cursos
+
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id        String   @id @default(uuid())
+  couponId  String
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usedAt    DateTime @default(now())
+
+  @@unique([couponId, userId])
+  @@map("coupon_usages")
+}
+
+model CourseCoupon {
+  couponId String
+  courseId String
+  coupon   Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([couponId, courseId])
+  @@map("course_coupons")
+}
+
+// ========================================
+// REVIEWS
+// ========================================
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  rating    Int      // 1-5
+  comment   String?  @db.Text
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@map("reviews")
+}
+
+// ========================================
+// MENSAJES DE CONTACTO
+// ========================================
+
+model Message {
+  id        String        @id @default(uuid())
+  userId    String?       // Nullable para mensajes de no registrados
+  user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  content   String        @db.Text
+  status    MessageStatus @default(UNREAD)
+  response  String?       @db.Text
+  respondedAt DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("messages")
+}
+
+// ========================================
+// CONFIGURACIÓN DEL SITIO
+// ========================================
+
+model SiteConfig {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       Json
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("site_config")
+}
+
+model FeatureToggle {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  isEnabled   Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("feature_toggles")
+}
+
+// ========================================
+// NOTIFICACIONES
+// ========================================
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String   @db.Text
+  type      String   // purchase, info, promo, etc.
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+// ========================================
+// LOGS Y AUDITORÍA
+// ========================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String   // CREATE, UPDATE, DELETE, LOGIN, etc.
+  entity     String   // User, Course, Order, etc.
+  entityId   String?
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model EmailLog {
+  id         String   @id @default(uuid())
+  to         String
+  subject    String
+  template   String
+  status     String   // sent, failed, bounced
+  error      String?  @db.Text
+  sentAt     DateTime @default(now())
+
+  @@map("email_logs")
+}
+
