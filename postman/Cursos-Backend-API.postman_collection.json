@@ -24,6 +24,26 @@
       "key": "userId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "courseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "moduleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lessonId",
+      "value": "",
+      "type": "string"
     }
   ],
   "auth": {
@@ -523,6 +543,844 @@
               ]
             },
             "description": "Cambiar rol de usuario (SUPER_ADMIN only). Roles: STUDENT, OWNER, SUPER_ADMIN"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "description": "Gestión de categorías de cursos",
+      "item": [
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Desarrollo Web\",\n  \"description\": \"Cursos de desarrollo web frontend y backend\",\n  \"slug\": \"desarrollo-web\",\n  \"color\": \"#3498db\",\n  \"icon\": \"code\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            },
+            "description": "Crear nueva categoría (Admin)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('categoryId', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Categories",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            },
+            "description": "Obtener todas las categorías (público)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            },
+            "description": "Obtener categoría por ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category by Slug",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/slug/desarrollo-web",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "slug", "desarrollo-web"]
+            },
+            "description": "Obtener categoría por slug"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Desarrollo Web Avanzado\",\n  \"description\": \"Cursos avanzados de desarrollo web\",\n  \"color\": \"#2980b9\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            },
+            "description": "Actualizar categoría (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reorder Categories",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderedIds\": [\"uuid-1\", \"uuid-2\", \"uuid-3\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/reorder/batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "reorder", "batch"]
+            },
+            "description": "Reordenar categorías (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            },
+            "description": "Eliminar categoría (Admin)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "description": "Gestión de cursos",
+      "item": [
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Curso Completo de NestJS\",\n  \"shortDescription\": \"Aprende NestJS desde cero hasta avanzado\",\n  \"longDescription\": \"En este curso aprenderás todo sobre NestJS, desde los conceptos básicos hasta técnicas avanzadas de desarrollo backend.\",\n  \"price\": 29990,\n  \"discountPrice\": 19990,\n  \"thumbnailUrl\": \"https://example.com/nestjs-thumbnail.jpg\",\n  \"previewVideoUrl\": \"https://youtube.com/watch?v=xxx\",\n  \"level\": \"Intermedio\",\n  \"language\": \"Español\",\n  \"isPublished\": false,\n  \"isFeatured\": false,\n  \"categoryIds\": [\"{{categoryId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses"]
+            },
+            "description": "Crear nuevo curso (Admin)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('courseId', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Courses",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "categoryId", "value": "", "disabled": true },
+                { "key": "categorySlug", "value": "", "disabled": true },
+                { "key": "level", "value": "", "disabled": true },
+                { "key": "isPublished", "value": "true", "disabled": true },
+                { "key": "isFeatured", "value": "", "disabled": true },
+                { "key": "sortBy", "value": "createdAt", "disabled": true },
+                { "key": "sortOrder", "value": "desc", "disabled": true }
+              ]
+            },
+            "description": "Obtener todos los cursos con filtros (público)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Featured Courses",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/featured?limit=6",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "featured"],
+              "query": [{ "key": "limit", "value": "6" }]
+            },
+            "description": "Obtener cursos destacados"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course by Slug",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/slug/curso-completo-de-nestjs",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "slug", "curso-completo-de-nestjs"]
+            },
+            "description": "Obtener curso por slug (incluye módulos)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course by ID",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}?includeModules=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{courseId}}"],
+              "query": [{ "key": "includeModules", "value": "true" }]
+            },
+            "description": "Obtener curso por ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{courseId}}", "stats"]
+            },
+            "description": "Obtener estadísticas del curso (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Curso Completo de NestJS 2024\",\n  \"price\": 34990,\n  \"discountPrice\": 24990,\n  \"level\": \"Avanzado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{courseId}}"]
+            },
+            "description": "Actualizar curso (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Publish Course",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}/toggle-publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{courseId}}", "toggle-publish"]
+            },
+            "description": "Publicar/despublicar curso (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Featured Course",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}/toggle-featured",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{courseId}}", "toggle-featured"]
+            },
+            "description": "Destacar/quitar destacado del curso (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reorder Courses",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderedIds\": [\"uuid-1\", \"uuid-2\", \"uuid-3\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/courses/reorder/batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "reorder", "batch"]
+            },
+            "description": "Reordenar cursos (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Course",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses", "{{courseId}}"]
+            },
+            "description": "Eliminar curso (Admin)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Modules",
+      "description": "Gestión de módulos de cursos",
+      "item": [
+        {
+          "name": "Create Module",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"title\": \"Introducción a NestJS\",\n  \"description\": \"En este módulo aprenderás los conceptos básicos de NestJS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/modules",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules"]
+            },
+            "description": "Crear nuevo módulo (Admin)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('moduleId', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Modules by Course",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/modules/course/{{courseId}}?includeLessons=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules", "course", "{{courseId}}"],
+              "query": [{ "key": "includeLessons", "value": "true" }]
+            },
+            "description": "Obtener módulos de un curso"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Module by ID",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/modules/{{moduleId}}?includeLessons=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules", "{{moduleId}}"],
+              "query": [{ "key": "includeLessons", "value": "true" }]
+            },
+            "description": "Obtener módulo por ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Module",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Introducción a NestJS - Actualizado\",\n  \"description\": \"Descripción actualizada del módulo\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/modules/{{moduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules", "{{moduleId}}"]
+            },
+            "description": "Actualizar módulo (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reorder Modules",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderedIds\": [\"uuid-1\", \"uuid-2\", \"uuid-3\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/modules/course/{{courseId}}/reorder",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules", "course", "{{courseId}}", "reorder"]
+            },
+            "description": "Reordenar módulos de un curso (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Duplicate Module",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/modules/{{moduleId}}/duplicate",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules", "{{moduleId}}", "duplicate"]
+            },
+            "description": "Duplicar módulo con sus lecciones (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Module",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/modules/{{moduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["modules", "{{moduleId}}"]
+            },
+            "description": "Eliminar módulo (Admin)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Lessons",
+      "description": "Gestión de lecciones",
+      "item": [
+        {
+          "name": "Create Lesson",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moduleId\": \"{{moduleId}}\",\n  \"title\": \"Instalación de NestJS\",\n  \"description\": \"Aprende a instalar y configurar NestJS\",\n  \"videoUrl\": \"https://vimeo.com/123456789\",\n  \"duration\": 15,\n  \"content\": \"# Instalación\\n\\nPara instalar NestJS...\",\n  \"resources\": [\n    { \"name\": \"Código fuente\", \"url\": \"https://github.com/...\" },\n    { \"name\": \"PDF\", \"url\": \"https://...\" }\n  ],\n  \"isFree\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lessons",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons"]
+            },
+            "description": "Crear nueva lección (Admin)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('lessonId', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Lessons by Module",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/module/{{moduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "module", "{{moduleId}}"]
+            },
+            "description": "Obtener lecciones de un módulo"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Free Lessons by Course",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/course/{{courseId}}/free",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "course", "{{courseId}}", "free"]
+            },
+            "description": "Obtener lecciones gratuitas de un curso"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Lesson by ID",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}?includeNavigation=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "{{lessonId}}"],
+              "query": [{ "key": "includeNavigation", "value": "true" }]
+            },
+            "description": "Obtener lección por ID con navegación"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Lesson",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Instalación de NestJS - Actualizado\",\n  \"duration\": 20,\n  \"isFree\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "{{lessonId}}"]
+            },
+            "description": "Actualizar lección (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reorder Lessons",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderedIds\": [\"uuid-1\", \"uuid-2\", \"uuid-3\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lessons/module/{{moduleId}}/reorder",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "module", "{{moduleId}}", "reorder"]
+            },
+            "description": "Reordenar lecciones de un módulo (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Move Lesson",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetModuleId\": \"uuid-del-modulo-destino\",\n  \"order\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}/move",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "{{lessonId}}", "move"]
+            },
+            "description": "Mover lección a otro módulo (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Duplicate Lesson",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}/duplicate",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "{{lessonId}}", "duplicate"]
+            },
+            "description": "Duplicar lección (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Lesson",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "{{lessonId}}"]
+            },
+            "description": "Eliminar lección (Admin)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "description": "Seguimiento de progreso del estudiante",
+      "item": [
+        {
+          "name": "Start Course Progress",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/progress/course/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "course", "start"]
+            },
+            "description": "Iniciar progreso en un curso"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/course/{{courseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "course", "{{courseId}}"]
+            },
+            "description": "Obtener progreso detallado de un curso"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Courses Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/my-courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "my-courses"]
+            },
+            "description": "Obtener progreso de todos mis cursos"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Lesson Progress",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"isCompleted\": false,\n  \"watchTime\": 300\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/progress/lesson",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "lesson"]
+            },
+            "description": "Actualizar progreso de una lección"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Lesson Complete",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/lesson/{{lessonId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "lesson", "{{lessonId}}", "complete"]
+            },
+            "description": "Marcar lección como completada"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Lesson Incomplete",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/lesson/{{lessonId}}/incomplete",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "lesson", "{{lessonId}}", "incomplete"]
+            },
+            "description": "Marcar lección como no completada"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Last Accessed Lesson",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/course/{{courseId}}/last-lesson",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "course", "{{courseId}}", "last-lesson"]
+            },
+            "description": "Obtener última lección accedida"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Course Progress",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/progress/course/{{courseId}}/reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "course", "{{courseId}}", "reset"]
+            },
+            "description": "Reiniciar progreso del curso"
           },
           "response": []
         }

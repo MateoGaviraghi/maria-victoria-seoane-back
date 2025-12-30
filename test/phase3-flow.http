@@ -1,0 +1,221 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@accessToken = 
+@categoryId = 
+@courseId = 
+@moduleId = 
+@lessonId = 
+
+########################################
+### FASE 3 - FLOW COMPLETO
+########################################
+
+### 1. Login para obtener token
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "NewPass1234!"
+}
+
+### 2. Crear Categoría
+# @name createCategory
+POST {{baseUrl}}/categories
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Desarrollo Web",
+  "description": "Cursos de desarrollo web frontend y backend",
+  "slug": "desarrollo-web",
+  "color": "#3498db",
+  "icon": "code"
+}
+
+### 3. Obtener todas las categorías (público)
+GET {{baseUrl}}/categories
+
+### 4. Obtener categoría por slug
+GET {{baseUrl}}/categories/slug/desarrollo-web
+
+### 5. Crear Curso
+# @name createCourse
+POST {{baseUrl}}/courses
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Curso Completo de NestJS",
+  "shortDescription": "Aprende NestJS desde cero hasta avanzado",
+  "longDescription": "En este curso aprenderás todo sobre NestJS, desde los conceptos básicos hasta técnicas avanzadas de desarrollo backend. Incluye Prisma, PostgreSQL, Docker, TypeScript y más.",
+  "price": 29990,
+  "discountPrice": 19990,
+  "thumbnailUrl": "https://example.com/nestjs-thumbnail.jpg",
+  "previewVideoUrl": "https://youtube.com/watch?v=xxx",
+  "level": "Intermedio",
+  "language": "Español",
+  "isPublished": false,
+  "isFeatured": false,
+  "categoryIds": ["{{categoryId}}"]
+}
+
+### 6. Obtener todos los cursos (público)
+GET {{baseUrl}}/courses?page=1&limit=10
+
+### 7. Publicar curso
+PATCH {{baseUrl}}/courses/{{courseId}}/toggle-publish
+Authorization: Bearer {{accessToken}}
+
+### 8. Marcar como destacado
+PATCH {{baseUrl}}/courses/{{courseId}}/toggle-featured
+Authorization: Bearer {{accessToken}}
+
+### 9. Obtener cursos destacados
+GET {{baseUrl}}/courses/featured?limit=6
+
+### 10. Obtener curso por ID (con módulos)
+GET {{baseUrl}}/courses/{{courseId}}?includeModules=true
+
+### 11. Crear Módulo 1
+# @name createModule1
+POST {{baseUrl}}/modules
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "courseId": "{{courseId}}",
+  "title": "Introducción a NestJS",
+  "description": "En este módulo aprenderás los conceptos básicos de NestJS y su arquitectura"
+}
+
+### 12. Crear Módulo 2
+# @name createModule2
+POST {{baseUrl}}/modules
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "courseId": "{{courseId}}",
+  "title": "Prisma y Base de Datos",
+  "description": "Aprende a integrar Prisma con NestJS y trabajar con PostgreSQL"
+}
+
+### 13. Obtener módulos del curso
+GET {{baseUrl}}/modules/course/{{courseId}}?includeLessons=true
+
+### 14. Crear Lección 1 (gratis)
+# @name createLesson1
+POST {{baseUrl}}/lessons
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "moduleId": "{{moduleId}}",
+  "title": "Instalación de NestJS",
+  "description": "Aprende a instalar y configurar NestJS desde cero",
+  "videoUrl": "https://vimeo.com/123456789",
+  "duration": 15,
+  "content": "# Instalación de NestJS\n\n## Requisitos previos\n- Node.js v18+\n- npm o yarn\n\n## Instalación\n```bash\nnpm i -g @nestjs/cli\nnest new project-name\n```",
+  "resources": [
+    {
+      "name": "Código fuente",
+      "url": "https://github.com/example/nestjs-intro"
+    },
+    {
+      "name": "Documentación oficial",
+      "url": "https://docs.nestjs.com"
+    }
+  ],
+  "isFree": true
+}
+
+### 15. Crear Lección 2 (premium)
+# @name createLesson2
+POST {{baseUrl}}/lessons
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "moduleId": "{{moduleId}}",
+  "title": "Estructura de un proyecto NestJS",
+  "description": "Conoce la estructura de carpetas y archivos de un proyecto NestJS",
+  "videoUrl": "https://vimeo.com/987654321",
+  "duration": 20,
+  "content": "# Estructura del Proyecto\n\n## Archivos principales\n- `main.ts` - Entry point\n- `app.module.ts` - Módulo raíz\n- `app.controller.ts` - Controlador raíz\n- `app.service.ts` - Servicio raíz",
+  "isFree": false
+}
+
+### 16. Obtener lecciones del módulo
+GET {{baseUrl}}/lessons/module/{{moduleId}}
+
+### 17. Obtener lecciones gratuitas del curso
+GET {{baseUrl}}/lessons/course/{{courseId}}/free
+
+### 18. Obtener lección por ID (con navegación)
+GET {{baseUrl}}/lessons/{{lessonId}}?includeNavigation=true
+
+### 19. Iniciar progreso del curso
+POST {{baseUrl}}/progress/course/start
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "courseId": "{{courseId}}"
+}
+
+### 20. Marcar lección como completada
+POST {{baseUrl}}/progress/lesson/{{lessonId}}/complete
+Authorization: Bearer {{accessToken}}
+
+### 21. Actualizar progreso de lección (watch time)
+PUT {{baseUrl}}/progress/lesson
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "lessonId": "{{lessonId}}",
+  "isCompleted": false,
+  "watchTime": 300
+}
+
+### 22. Obtener progreso del curso
+GET {{baseUrl}}/progress/course/{{courseId}}
+Authorization: Bearer {{accessToken}}
+
+### 23. Obtener mis cursos en progreso
+GET {{baseUrl}}/progress/my-courses
+Authorization: Bearer {{accessToken}}
+
+### 24. Obtener última lección accedida
+GET {{baseUrl}}/progress/course/{{courseId}}/last-lesson
+Authorization: Bearer {{accessToken}}
+
+### 25. Obtener estadísticas del curso (Admin)
+GET {{baseUrl}}/courses/{{courseId}}/stats
+Authorization: Bearer {{accessToken}}
+
+### 26. Duplicar módulo
+POST {{baseUrl}}/modules/{{moduleId}}/duplicate
+Authorization: Bearer {{accessToken}}
+
+### 27. Duplicar lección
+POST {{baseUrl}}/lessons/{{lessonId}}/duplicate
+Authorization: Bearer {{accessToken}}
+
+########################################
+### CLEANUP (opcional)
+########################################
+
+### Reset progreso del curso
+# DELETE {{baseUrl}}/progress/course/{{courseId}}/reset
+# Authorization: Bearer {{accessToken}}
+
+### Eliminar curso (cascada: módulos y lecciones)
+# DELETE {{baseUrl}}/courses/{{courseId}}
+# Authorization: Bearer {{accessToken}}
+
+### Eliminar categoría
+# DELETE {{baseUrl}}/categories/{{categoryId}}
+# Authorization: Bearer {{accessToken}}

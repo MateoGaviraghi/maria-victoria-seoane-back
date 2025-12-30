@@ -8,6 +8,11 @@ import { configuration } from './config';
 import { PrismaModule } from './prisma';
 import { AuthModule } from './modules/auth';
 import { UsersModule } from './modules/users';
+import { CategoriesModule } from './modules/categories';
+import { CoursesModule } from './modules/courses';
+import { CourseModulesModule } from './modules/course-modules';
+import { LessonsModule } from './modules/lessons';
+import { ProgressModule } from './modules/progress';
 import { JwtAuthGuard, RolesGuard } from './common/guards';
 import { AllExceptionsFilter } from './common/filters';
 import { TransformInterceptor } from './common/interceptors';
@@ -30,7 +35,11 @@ import { TransformInterceptor } from './common/interceptors';
     // Módulos de la aplicación
     AuthModule,
     UsersModule,
-    // CoursesModule,
+    CategoriesModule,
+    CoursesModule,
+    CourseModulesModule,
+    LessonsModule,
+    ProgressModule,
     // CartModule,
     // CheckoutModule,
     // PaymentsModule,
