@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configuration } from './config';
 import { PrismaModule } from './prisma';
+import { AuthModule } from './modules/auth';
+import { UsersModule } from './modules/users';
+import { JwtAuthGuard, RolesGuard } from './common/guards';
+import { AllExceptionsFilter } from './common/filters';
+import { TransformInterceptor } from './common/interceptors';
 
 @Module({
   imports: [
@@ -21,9 +27,9 @@ import { PrismaModule } from './prisma';
     // Base de datos
     PrismaModule,
 
-    // Módulos de la aplicación (se irán agregando)
-    // AuthModule,
-    // UsersModule,
+    // Módulos de la aplicación
+    AuthModule,
+    UsersModule,
     // CoursesModule,
     // CartModule,
     // CheckoutModule,
@@ -36,6 +42,28 @@ import { PrismaModule } from './prisma';
     // EmailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Guard global de JWT
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    // Guard global de roles
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    // Filtro global de excepciones
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+    // Interceptor global de transformación
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    },
+  ],
 })
 export class AppModule {}
