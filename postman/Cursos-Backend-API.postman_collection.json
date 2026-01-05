@@ -73,7 +73,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"nuevo@test.com\",\n  \"password\": \"Test1234!\",\n  \"firstName\": \"Nombre\",\n  \"lastName\": \"Apellido\"\n}"
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"Admin1234!\",\n  \"firstName\": \"Admin\",\n  \"lastName\": \"Test\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
@@ -114,7 +114,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"test@test.com\",\n  \"password\": \"NewPass1234!\"\n}"
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"Admin1234!\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -209,7 +209,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"test@test.com\"\n}"
+              "raw": "{\n  \"email\": \"admin@test.com\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/forgot-password",
@@ -255,7 +255,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"NewPass1234!\",\n  \"newPassword\": \"OtraPass1234!\"\n}"
+              "raw": "{\n  \"currentPassword\": \"Admin1234!\",\n  \"newPassword\": \"NuevaPass1234!\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/change-password",
