@@ -168,7 +168,7 @@ export class CategoriesService {
   // ==========================================
   // ELIMINAR CATEGORÍA
   // ==========================================
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<{ message: string }> {
     await this.findById(id);
 
     // Verificar si tiene cursos asociados
@@ -185,6 +185,8 @@ export class CategoriesService {
     await this.prisma.category.delete({
       where: { id },
     });
+
+    return { message: 'Categoría eliminada correctamente' };
   }
 
   // ==========================================

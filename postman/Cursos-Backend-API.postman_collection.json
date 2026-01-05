@@ -1066,7 +1066,7 @@
     },
     {
       "name": "Lessons",
-      "description": "Gestión de lecciones",
+      "description": "Gestión de lecciones (temario)",
       "item": [
         {
           "name": "Create Lesson",
@@ -1080,14 +1080,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"moduleId\": \"{{moduleId}}\",\n  \"title\": \"Instalación de NestJS\",\n  \"description\": \"Aprende a instalar y configurar NestJS\",\n  \"videoUrl\": \"https://vimeo.com/123456789\",\n  \"duration\": 15,\n  \"content\": \"# Instalación\\n\\nPara instalar NestJS...\",\n  \"resources\": [\n    { \"name\": \"Código fuente\", \"url\": \"https://github.com/...\" },\n    { \"name\": \"PDF\", \"url\": \"https://...\" }\n  ],\n  \"isFree\": true\n}"
+              "raw": "{\n  \"moduleId\": \"{{moduleId}}\",\n  \"title\": \"Instalación de NestJS\",\n  \"description\": \"Aprende a instalar y configurar NestJS\",\n  \"duration\": 15,\n  \"isFree\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/lessons",
               "host": ["{{baseUrl}}"],
               "path": ["lessons"]
             },
-            "description": "Crear nueva lección (Admin)"
+            "description": "Crear nueva lección (Admin). NOTA: Los campos de contenido (videoUrl, content, resources) se gestionan en el backend de plataforma educativa."
           },
           "response": [],
           "event": [
@@ -1116,22 +1116,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["lessons", "module", "{{moduleId}}"]
             },
-            "description": "Obtener lecciones de un módulo"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Free Lessons by Course",
-          "request": {
-            "auth": { "type": "noauth" },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/lessons/course/{{courseId}}/free",
-              "host": ["{{baseUrl}}"],
-              "path": ["lessons", "course", "{{courseId}}", "free"]
-            },
-            "description": "Obtener lecciones gratuitas de un curso"
+            "description": "Obtener lecciones de un módulo (temario)"
           },
           "response": []
         },
@@ -1142,12 +1127,11 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/lessons/{{lessonId}}?includeNavigation=true",
+              "raw": "{{baseUrl}}/lessons/{{lessonId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["lessons", "{{lessonId}}"],
-              "query": [{ "key": "includeNavigation", "value": "true" }]
+              "path": ["lessons", "{{lessonId}}"]
             },
-            "description": "Obtener lección por ID con navegación"
+            "description": "Obtener lección por ID"
           },
           "response": []
         },
@@ -1245,142 +1229,6 @@
               "path": ["lessons", "{{lessonId}}"]
             },
             "description": "Eliminar lección (Admin)"
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Progress",
-      "description": "Seguimiento de progreso del estudiante",
-      "item": [
-        {
-          "name": "Start Course Progress",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/progress/course/start",
-              "host": ["{{baseUrl}}"],
-              "path": ["progress", "course", "start"]
-            },
-            "description": "Iniciar progreso en un curso"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Course Progress",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/progress/course/{{courseId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["progress", "course", "{{courseId}}"]
-            },
-            "description": "Obtener progreso detallado de un curso"
-          },
-          "response": []
-        },
-        {
-          "name": "Get My Courses Progress",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/progress/my-courses",
-              "host": ["{{baseUrl}}"],
-              "path": ["progress", "my-courses"]
-            },
-            "description": "Obtener progreso de todos mis cursos"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Lesson Progress",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"lessonId\": \"{{lessonId}}\",\n  \"isCompleted\": false,\n  \"watchTime\": 300\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/progress/lesson",
-              "host": ["{{baseUrl}}"],
-              "path": ["progress", "lesson"]
-            },
-            "description": "Actualizar progreso de una lección"
-          },
-          "response": []
-        },
-        {
-          "name": "Mark Lesson Complete",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/progress/lesson/{{lessonId}}/complete",
-              "host": ["{{baseUrl}}"],
-              "path": ["progress", "lesson", "{{lessonId}}", "complete"]
-            },
-            "description": "Marcar lección como completada"
-          },
-          "response": []
-        },
-        {
-          "name": "Mark Lesson Incomplete",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/progress/lesson/{{lessonId}}/incomplete",
-              "host": ["{{baseUrl}}"],
-              "path": ["progress", "lesson", "{{lessonId}}", "incomplete"]
-            },
-            "description": "Marcar lección como no completada"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Last Accessed Lesson",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/progress/course/{{courseId}}/last-lesson",
-              "host": ["{{baseUrl}}"],
-              "path": ["progress", "course", "{{courseId}}", "last-lesson"]
-            },
-            "description": "Obtener última lección accedida"
-          },
-          "response": []
-        },
-        {
-          "name": "Reset Course Progress",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/progress/course/{{courseId}}/reset",
-              "host": ["{{baseUrl}}"],
-              "path": ["progress", "course", "{{courseId}}", "reset"]
-            },
-            "description": "Reiniciar progreso del curso"
           },
           "response": []
         }

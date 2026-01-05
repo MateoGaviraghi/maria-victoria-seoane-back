@@ -175,7 +175,6 @@ export class UsersService {
           updatedAt: true,
           _count: {
             select: {
-              courseProgress: true,
               orders: true,
             },
           },
@@ -213,21 +212,27 @@ export class UsersService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
-        courseProgress: {
+        orders: {
+          where: { status: 'COMPLETED' },
           include: {
-            course: {
-              select: {
-                id: true,
-                title: true,
-                slug: true,
-                thumbnailUrl: true,
+            items: {
+              include: {
+                course: {
+                  select: {
+                    id: true,
+                    title: true,
+                    slug: true,
+                    thumbnailUrl: true,
+                  },
+                },
               },
             },
           },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
         },
         _count: {
           select: {
-            courseProgress: true,
             orders: true,
             reviews: true,
           },

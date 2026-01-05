@@ -9,8 +9,6 @@ import {
   Param,
   Query,
   ParseUUIDPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -214,15 +212,16 @@ export class CoursesController {
   @Delete(':id')
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar curso' })
-  @ApiResponse({ status: 204, description: 'Curso eliminado' })
+  @ApiResponse({ status: 200, description: 'Curso eliminado' })
   @ApiResponse({ status: 404, description: 'Curso no encontrado' })
   @ApiResponse({
     status: 409,
     description: 'No se puede eliminar, tiene estudiantes u órdenes',
   })
-  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  async delete(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ message: string }> {
     return this.coursesService.delete(id);
   }
 

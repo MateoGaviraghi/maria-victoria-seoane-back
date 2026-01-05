@@ -8,8 +8,6 @@ import {
   Param,
   Query,
   ParseUUIDPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -148,15 +146,16 @@ export class CategoriesController {
   @Delete(':id')
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar categoría' })
-  @ApiResponse({ status: 204, description: 'Categoría eliminada' })
+  @ApiResponse({ status: 200, description: 'Categoría eliminada' })
   @ApiResponse({ status: 404, description: 'Categoría no encontrada' })
   @ApiResponse({
     status: 409,
     description: 'No se puede eliminar, tiene cursos asociados',
   })
-  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  async delete(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ message: string }> {
     return this.categoriesService.delete(id);
   }
 

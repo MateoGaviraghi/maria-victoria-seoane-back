@@ -44,10 +44,7 @@ export class LessonsService {
         moduleId: dto.moduleId,
         title: dto.title,
         description: dto.description,
-        videoUrl: dto.videoUrl,
         duration: dto.duration,
-        content: dto.content,
-        resources: dto.resources ?? undefined,
         order,
         isFree: dto.isFree || false,
       },
@@ -83,10 +80,7 @@ export class LessonsService {
   // ==========================================
   // OBTENER LECCIÓN POR ID
   // ==========================================
-  async findById(
-    id: string,
-    includeNavigation = false,
-  ): Promise<LessonDetailResponseDto> {
+  async findById(id: string): Promise<LessonDetailResponseDto> {
     const lesson = await this.prisma.lesson.findUnique({
       where: { id },
       include: {
@@ -107,40 +101,7 @@ export class LessonsService {
       throw new NotFoundException('Lección no encontrada');
     }
 
-    // Obtener navegación (anterior y siguiente)
-    let navigation:
-      | {
-          previous: { id: string; title: string } | null;
-          next: { id: string; title: string } | null;
-        }
-      | undefined = undefined;
-    if (includeNavigation) {
-      const [previous, next] = await Promise.all([
-        this.prisma.lesson.findFirst({
-          where: {
-            moduleId: lesson.moduleId,
-            order: { lt: lesson.order },
-          },
-          orderBy: { order: 'desc' },
-          select: { id: true, title: true },
-        }),
-        this.prisma.lesson.findFirst({
-          where: {
-            moduleId: lesson.moduleId,
-            order: { gt: lesson.order },
-          },
-          orderBy: { order: 'asc' },
-          select: { id: true, title: true },
-        }),
-      ]);
-
-      navigation = { previous, next };
-    }
-
-    return {
-      ...lesson,
-      navigation,
-    };
+    return lesson;
   }
 
   // ==========================================
@@ -165,10 +126,7 @@ export class LessonsService {
       data: {
         title: dto.title,
         description: dto.description,
-        videoUrl: dto.videoUrl,
         duration: dto.duration,
-        content: dto.content,
-        resources: dto.resources ?? undefined,
         order: dto.order,
         isFree: dto.isFree,
       },
@@ -178,24 +136,13 @@ export class LessonsService {
   // ==========================================
   // ELIMINAR LECCIÓN
   // ==========================================
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<{ message: string }> {
     const lesson = await this.prisma.lesson.findUnique({
       where: { id },
     });
 
     if (!lesson) {
       throw new NotFoundException('Lección no encontrada');
-    }
-
-    // Verificar si tiene progreso de estudiantes
-    const progressCount = await this.prisma.lessonProgress.count({
-      where: { lessonId: id },
-    });
-
-    if (progressCount > 0) {
-      throw new BadRequestException(
-        `No se puede eliminar la lección porque tiene ${progressCount} registro(s) de progreso de estudiantes`,
-      );
     }
 
     await this.prisma.lesson.delete({
@@ -218,6 +165,8 @@ export class LessonsService {
     if (updates.length > 0) {
       await this.prisma.$transaction(updates);
     }
+
+    return { message: 'Lección eliminada correctamente' };
   }
 
   // ==========================================
@@ -360,33 +309,10 @@ export class LessonsService {
         moduleId: lesson.moduleId,
         title: `${lesson.title} (copia)`,
         description: lesson.description,
-        videoUrl: lesson.videoUrl,
         duration: lesson.duration,
-        content: lesson.content,
-        resources: lesson.resources ?? undefined,
         order: newOrder,
         isFree: lesson.isFree,
       },
     });
-  }
-
-  // ==========================================
-  // OBTENER LECCIONES GRATUITAS DE UN CURSO
-  // ==========================================
-  async findFreeByCourseId(courseId: string): Promise<Lesson[]> {
-    const lessons = await this.prisma.lesson.findMany({
-      where: {
-        isFree: true,
-        module: { courseId },
-      },
-      orderBy: [{ module: { order: 'asc' } }, { order: 'asc' }],
-      include: {
-        module: {
-          select: { id: true, title: true },
-        },
-      },
-    });
-
-    return lessons;
   }
 }

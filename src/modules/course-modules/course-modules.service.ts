@@ -178,7 +178,9 @@ export class CourseModulesService {
   // ==========================================
   // ELIMINAR MÓDULO
   // ==========================================
-  async delete(id: string): Promise<void> {
+  async delete(
+    id: string,
+  ): Promise<{ message: string; deletedLessons: number }> {
     const module = await this.prisma.module.findUnique({
       where: { id },
       include: { lessons: { select: { id: true } } },
@@ -187,6 +189,8 @@ export class CourseModulesService {
     if (!module) {
       throw new NotFoundException('Módulo no encontrado');
     }
+
+    const lessonsCount = module.lessons.length;
 
     // Eliminar módulo (las lecciones se eliminan en cascada)
     await this.prisma.module.delete({
@@ -209,6 +213,11 @@ export class CourseModulesService {
     if (updates.length > 0) {
       await this.prisma.$transaction(updates);
     }
+
+    return {
+      message: 'Módulo eliminado correctamente',
+      deletedLessons: lessonsCount,
+    };
   }
 
   // ==========================================

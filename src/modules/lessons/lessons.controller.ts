@@ -7,17 +7,13 @@ import {
   Delete,
   Body,
   Param,
-  Query,
   ParseUUIDPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { LessonsService } from './lessons.service';
 import {
@@ -74,36 +70,11 @@ export class LessonsController {
   }
 
   // ==========================================
-  // OBTENER LECCIONES GRATUITAS DE UN CURSO
-  // ==========================================
-  @Get('course/:courseId/free')
-  @Public()
-  @ApiOperation({ summary: 'Obtener lecciones gratuitas de un curso' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de lecciones gratuitas',
-    type: [LessonResponseDto],
-  })
-  async findFreeByCourseId(
-    @Param('courseId', ParseUUIDPipe) courseId: string,
-  ): Promise<LessonResponseDto[]> {
-    return this.lessonsService.findFreeByCourseId(
-      courseId,
-    ) as unknown as Promise<LessonResponseDto[]>;
-  }
-
-  // ==========================================
   // OBTENER LECCIÓN POR ID
   // ==========================================
   @Get(':id')
   @Public()
   @ApiOperation({ summary: 'Obtener lección por ID' })
-  @ApiQuery({
-    name: 'includeNavigation',
-    required: false,
-    type: Boolean,
-    description: 'Incluir navegación (anterior/siguiente)',
-  })
   @ApiResponse({
     status: 200,
     description: 'Lección encontrada',
@@ -112,9 +83,8 @@ export class LessonsController {
   @ApiResponse({ status: 404, description: 'Lección no encontrada' })
   async findById(
     @Param('id', ParseUUIDPipe) id: string,
-    @Query('includeNavigation') includeNavigation?: string,
   ): Promise<LessonDetailResponseDto> {
-    return this.lessonsService.findById(id, includeNavigation === 'true');
+    return this.lessonsService.findById(id);
   }
 
   // ==========================================
@@ -143,15 +113,12 @@ export class LessonsController {
   @Delete(':id')
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar lección' })
-  @ApiResponse({ status: 204, description: 'Lección eliminada' })
+  @ApiResponse({ status: 200, description: 'Lección eliminada' })
   @ApiResponse({ status: 404, description: 'Lección no encontrada' })
-  @ApiResponse({
-    status: 400,
-    description: 'No se puede eliminar, tiene progreso de estudiantes',
-  })
-  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  async delete(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ message: string }> {
     return this.lessonsService.delete(id);
   }
 

@@ -187,7 +187,7 @@ export class CoursesService {
           _count: {
             select: {
               reviews: true,
-              courseProgress: true,
+              orderItems: true,
             },
           },
         },
@@ -202,7 +202,7 @@ export class CoursesService {
       discountPrice: course.discountPrice ? Number(course.discountPrice) : null,
       categories: course.categories.map((cc) => cc.category),
       modulesCount: course.modules.length,
-      studentsCount: course._count.courseProgress,
+      studentsCount: course._count.orderItems,
       reviewsCount: course._count.reviews,
       modules: undefined,
       _count: undefined,
@@ -252,7 +252,7 @@ export class CoursesService {
         _count: {
           select: {
             reviews: true,
-            courseProgress: true,
+            orderItems: true,
           },
         },
       },
@@ -283,7 +283,7 @@ export class CoursesService {
       categories: categories.map((cc) => cc.category),
       modulesCount: modules.length,
       lessonsCount,
-      studentsCount: _count.courseProgress,
+      studentsCount: _count.orderItems,
       reviewsCount: _count.reviews,
       averageRating: avgRating._avg.rating || 0,
       modules: includeModules
@@ -380,22 +380,11 @@ export class CoursesService {
   // ==========================================
   // ELIMINAR CURSO
   // ==========================================
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<{ message: string }> {
     const course = await this.prisma.course.findUnique({ where: { id } });
 
     if (!course) {
       throw new NotFoundException('Curso no encontrado');
-    }
-
-    // Verificar si tiene estudiantes con progreso
-    const studentsCount = await this.prisma.courseProgress.count({
-      where: { courseId: id },
-    });
-
-    if (studentsCount > 0) {
-      throw new ConflictException(
-        `No se puede eliminar el curso porque tiene ${studentsCount} estudiante(s) con progreso registrado`,
-      );
     }
 
     // Verificar si tiene órdenes
@@ -412,6 +401,8 @@ export class CoursesService {
     await this.prisma.course.delete({
       where: { id },
     });
+
+    return { message: 'Curso eliminado correctamente' };
   }
 
   // ==========================================
@@ -511,48 +502,34 @@ export class CoursesService {
       throw new NotFoundException('Curso no encontrado');
     }
 
-    const [
-      studentsCount,
-      completedCount,
-      inProgressCount,
-      avgProgress,
-      reviewsCount,
-      avgRating,
-      totalRevenue,
-    ] = await Promise.all([
-      this.prisma.courseProgress.count({ where: { courseId: id } }),
-      this.prisma.courseProgress.count({
-        where: { courseId: id, completedAt: { not: null } },
-      }),
-      this.prisma.courseProgress.count({
-        where: { courseId: id, completedAt: null },
-      }),
-      this.prisma.courseProgress.aggregate({
-        where: { courseId: id },
-        _avg: { progressPercent: true },
-      }),
-      this.prisma.review.count({ where: { courseId: id } }),
-      this.prisma.review.aggregate({
-        where: { courseId: id },
-        _avg: { rating: true },
-      }),
-      this.prisma.orderItem.aggregate({
-        where: {
-          courseId: id,
-          order: { status: 'COMPLETED' },
-        },
-        _sum: { price: true },
-      }),
-    ]);
+    const [studentsCount, reviewsCount, avgRating, totalRevenue] =
+      await Promise.all([
+        // Contar estudiantes que compraron el curso (órdenes completadas)
+        this.prisma.orderItem.count({
+          where: {
+            courseId: id,
+            order: { status: 'COMPLETED' },
+          },
+        }),
+        this.prisma.review.count({ where: { courseId: id } }),
+        this.prisma.review.aggregate({
+          where: { courseId: id },
+          _avg: { rating: true },
+        }),
+        this.prisma.orderItem.aggregate({
+          where: {
+            courseId: id,
+            order: { status: 'COMPLETED' },
+          },
+          _sum: { price: true },
+        }),
+      ]);
 
     return {
       courseId: id,
       title: course.title,
       students: {
         total: studentsCount,
-        completed: completedCount,
-        inProgress: inProgressCount,
-        averageProgress: avgProgress._avg.progressPercent || 0,
       },
       reviews: {
         total: reviewsCount,

@@ -4,7 +4,6 @@ import {
   IsInt,
   IsBoolean,
   IsUUID,
-  IsObject,
   Min,
   MaxLength,
   MinLength,
@@ -12,7 +11,6 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Prisma } from '@prisma/client';
 
 // ==========================================
 // CREATE LESSON DTO
@@ -44,41 +42,14 @@ export class CreateLessonDto {
   description?: string;
 
   @ApiPropertyOptional({
-    example: 'https://vimeo.com/123456789',
-    description: 'URL del video de la lección',
-  })
-  @IsOptional()
-  @IsString()
-  videoUrl?: string;
-
-  @ApiPropertyOptional({
     example: 15,
-    description: 'Duración del video en minutos',
+    description: 'Duración estimada en minutos (para mostrar en temario)',
   })
   @IsOptional()
   @IsInt()
   @Min(0)
   @Type(() => Number)
   duration?: number;
-
-  @ApiPropertyOptional({
-    example: '# Contenido de la lección\n\nEste es el contenido en markdown...',
-    description: 'Contenido adicional de la lección (markdown)',
-  })
-  @IsOptional()
-  @IsString()
-  content?: string;
-
-  @ApiPropertyOptional({
-    example: [
-      { name: 'Código fuente', url: 'https://github.com/...' },
-      { name: 'PDF', url: 'https://...' },
-    ],
-    description: 'Recursos descargables de la lección',
-  })
-  @IsOptional()
-  @IsObject()
-  resources?: Prisma.InputJsonValue;
 
   @ApiPropertyOptional({
     example: 0,
@@ -127,17 +98,11 @@ export class LessonResponseDto {
   @ApiPropertyOptional({ example: 'En esta lección aprenderás...' })
   description?: string | null;
 
-  @ApiPropertyOptional({ example: 'https://vimeo.com/123456789' })
-  videoUrl?: string | null;
-
-  @ApiPropertyOptional({ example: 15 })
+  @ApiPropertyOptional({
+    example: 15,
+    description: 'Duración estimada en minutos',
+  })
   duration?: number | null;
-
-  @ApiPropertyOptional({ example: '# Contenido...' })
-  content?: string | null;
-
-  @ApiPropertyOptional({ type: Object })
-  resources?: any;
 
   @ApiProperty({ example: 0 })
   order: number;
@@ -166,12 +131,6 @@ export class LessonDetailResponseDto extends LessonResponseDto {
       title: string;
       slug: string;
     };
-  };
-
-  @ApiPropertyOptional({ type: Object })
-  navigation?: {
-    previous?: { id: string; title: string } | null;
-    next?: { id: string; title: string } | null;
   };
 }
 

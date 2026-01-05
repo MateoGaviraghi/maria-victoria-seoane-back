@@ -8,8 +8,6 @@ import {
   Param,
   Query,
   ParseUUIDPipe,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -132,11 +130,12 @@ export class CourseModulesController {
   @Delete(':id')
   @Roles(Role.SUPER_ADMIN, Role.OWNER)
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar módulo y sus lecciones' })
-  @ApiResponse({ status: 204, description: 'Módulo eliminado' })
+  @ApiResponse({ status: 200, description: 'Módulo eliminado' })
   @ApiResponse({ status: 404, description: 'Módulo no encontrado' })
-  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  async delete(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ message: string; deletedLessons: number }> {
     return this.modulesService.delete(id);
   }
 
