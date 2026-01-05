@@ -15,7 +15,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiBody,
 } from '@nestjs/swagger';
 import type { Response, Request } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -152,7 +151,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Obtener usuario actual' })
   @ApiResponse({ status: 200, description: 'Datos del usuario' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
-  getProfile(@CurrentUser() user: any) {
+  getProfile(@CurrentUser() user: unknown) {
     return { user };
   }
 

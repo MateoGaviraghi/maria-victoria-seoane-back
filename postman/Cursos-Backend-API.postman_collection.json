@@ -44,6 +44,26 @@
       "key": "lessonId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "couponId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "preferenceId",
+      "value": "",
+      "type": "string"
     }
   ],
   "auth": {
@@ -1229,6 +1249,556 @@
               "path": ["lessons", "{{lessonId}}"]
             },
             "description": "Eliminar lección (Admin)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "description": "Endpoints del carrito de compras",
+      "item": [
+        {
+          "name": "1. Get My Cart",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "Obtener el carrito del usuario autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Add Course to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "Agregar un curso al carrito"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Cart Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cart/count",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "count"]
+            },
+            "description": "Obtener cantidad de items en el carrito"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Apply Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DESCUENTO20\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart/apply-coupon",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "apply-coupon"]
+            },
+            "description": "Aplicar cupón de descuento al carrito"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Remove Course from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cart/{{courseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "{{courseId}}"]
+            },
+            "description": "Eliminar un curso del carrito"
+          },
+          "response": []
+        },
+        {
+          "name": "6. Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "Vaciar todo el carrito"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Coupons",
+      "description": "Endpoints de cupones de descuento",
+      "item": [
+        {
+          "name": "1. Create Coupon (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DESCUENTO20\",\n  \"type\": \"PERCENTAGE\",\n  \"value\": 20,\n  \"description\": \"20% de descuento\",\n  \"minPurchase\": 0,\n  \"maxUses\": 100,\n  \"maxUsesPerUser\": 1,\n  \"validFrom\": \"2024-01-01T00:00:00.000Z\",\n  \"validUntil\": \"2027-12-31T23:59:59.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coupons",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons"]
+            },
+            "description": "Crear nuevo cupón (Admin). Tipo: PERCENTAGE o FIXED"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.id) {",
+                  "        pm.collectionVariables.set('couponId', response.data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Validate Coupon (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DESCUENTO20\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coupons/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons", "validate"]
+            },
+            "description": "Validar si un cupón es válido (público)"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get All Coupons (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coupons",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons"]
+            },
+            "description": "Listar todos los cupones (Admin)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.coupons && response.data.coupons.length > 0) {",
+                  "        pm.collectionVariables.set('couponId', response.data.coupons[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Get Coupon Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coupons/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons", "stats"]
+            },
+            "description": "Estadísticas de cupones (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get Coupon by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coupons/{{couponId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons", "{{couponId}}"]
+            },
+            "description": "Obtener cupón por ID (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "6. Update Coupon (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"25% de descuento actualizado\",\n  \"value\": 25,\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coupons/{{couponId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons", "{{couponId}}"]
+            },
+            "description": "Actualizar cupón (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "7. Delete Coupon (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/coupons/{{couponId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["coupons", "{{couponId}}"]
+            },
+            "description": "Eliminar cupón (Admin)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Checkout",
+      "description": "Endpoints de proceso de compra",
+      "item": [
+        {
+          "name": "1. Get Checkout Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/checkout/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "summary"]
+            },
+            "description": "Ver resumen del carrito antes de pagar"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Validate Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerEmail\": \"cliente@test.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkout/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "validate"]
+            },
+            "description": "Validar datos antes de crear la orden"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Create Checkout (Order + MP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerEmail\": \"cliente@test.com\",\n  \"customerPhone\": \"+5491112345678\",\n  \"customerDni\": \"12345678\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout"]
+            },
+            "description": "Crear orden y obtener URL de pago de MercadoPago"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data) {",
+                  "        pm.collectionVariables.set('orderId', response.data.orderId);",
+                  "        if (response.data.preferenceId) {",
+                  "            pm.collectionVariables.set('preferenceId', response.data.preferenceId);",
+                  "        }",
+                  "        console.log('URL de pago:', response.data.initPoint);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "description": "Endpoints de órdenes de compra",
+      "item": [
+        {
+          "name": "1. Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "my"]
+            },
+            "description": "Obtener mis órdenes"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.orders && response.data.orders.length > 0) {",
+                  "        pm.collectionVariables.set('orderId', response.data.orders[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}"]
+            },
+            "description": "Obtener detalles de una orden"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Cancel Order",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{orderId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "{{orderId}}", "cancel"]
+            },
+            "description": "Cancelar orden (solo si está PENDING)"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get All Orders (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            },
+            "description": "Obtener todas las órdenes (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get Orders Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/admin/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "admin", "stats"]
+            },
+            "description": "Estadísticas de órdenes (Admin)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "description": "Endpoints de pagos y webhooks",
+      "item": [
+        {
+          "name": "1. Simulate Payment (Dev)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/simulate/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "simulate", "{{orderId}}"]
+            },
+            "description": "Simular aprobación de pago (solo desarrollo, requiere SUPER_ADMIN)"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get All Payments (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments"]
+            },
+            "description": "Listar todos los pagos (Admin)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data.payments && response.data.payments.length > 0) {",
+                  "        pm.collectionVariables.set('paymentId', response.data.payments[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Get Payments Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "stats"]
+            },
+            "description": "Estadísticas de pagos (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Payment by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/{{paymentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "{{paymentId}}"]
+            },
+            "description": "Obtener pago por ID (Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "5. MercadoPago Webhook (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"payment.updated\",\n  \"data\": {\n    \"id\": \"123456789\"\n  },\n  \"type\": \"payment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/webhook/mercadopago",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "webhook", "mercadopago"]
+            },
+            "description": "Webhook de MercadoPago (automático, no llamar manualmente)"
           },
           "response": []
         }

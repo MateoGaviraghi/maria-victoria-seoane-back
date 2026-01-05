@@ -12,6 +12,11 @@ import { CategoriesModule } from './modules/categories';
 import { CoursesModule } from './modules/courses';
 import { CourseModulesModule } from './modules/course-modules';
 import { LessonsModule } from './modules/lessons';
+import { CartModule } from './modules/cart/cart.module';
+import { CouponsModule } from './modules/coupons/coupons.module';
+import { CheckoutModule } from './modules/checkout/checkout.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { JwtAuthGuard, RolesGuard } from './common/guards';
 import { AllExceptionsFilter } from './common/filters';
 import { TransformInterceptor } from './common/interceptors';
@@ -38,15 +43,13 @@ import { TransformInterceptor } from './common/interceptors';
     CoursesModule,
     CourseModulesModule,
     LessonsModule,
-    // CartModule,
-    // CheckoutModule,
-    // PaymentsModule,
-    // OrdersModule,
-    // CouponsModule,
-    // MessagesModule,
-    // SiteConfigModule,
-    // DashboardModule,
-    // EmailModule,
+
+    // Módulos de Ventas
+    CartModule,
+    CouponsModule,
+    CheckoutModule,
+    OrdersModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [

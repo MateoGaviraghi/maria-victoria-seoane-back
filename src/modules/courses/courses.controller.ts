@@ -104,9 +104,7 @@ export class CoursesController {
   async findBySlug(
     @Param('slug') slug: string,
   ): Promise<CourseDetailResponseDto> {
-    return this.coursesService.findBySlug(
-      slug,
-    ) as Promise<CourseDetailResponseDto>;
+    return this.coursesService.findBySlug(slug);
   }
 
   // ==========================================
@@ -131,10 +129,7 @@ export class CoursesController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query('includeModules') includeModules?: string,
   ): Promise<CourseDetailResponseDto> {
-    return this.coursesService.findById(
-      id,
-      includeModules === 'true',
-    ) as Promise<CourseDetailResponseDto>;
+    return this.coursesService.findById(id, includeModules === 'true');
   }
 
   // ==========================================

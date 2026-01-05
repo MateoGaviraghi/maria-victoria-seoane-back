@@ -12,6 +12,7 @@ export type UserWithoutPassword = Omit<User, 'password'>;
 
 // Helper para excluir el password
 export function excludePassword(user: User): UserWithoutPassword {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: _, ...userWithoutPassword } = user;
   return userWithoutPassword;
 }
