@@ -59,6 +59,36 @@ enum MessageStatus {
   ARCHIVED // Archivado
 }
 
+enum EmailType {
+  VERIFICATION
+  WELCOME
+  PURCHASE_CONFIRMED
+  COURSE_ACCESS
+  PASSWORD_RESET
+  ORDER_CANCELLED
+  CART_ABANDONED_1H
+  CART_ABANDONED_24H
+  CART_ABANDONED_72H
+  NEW_COUPON
+  COUPON_EXPIRING
+  BIRTHDAY
+  NEW_COURSE
+  RECOMPRA
+  ADMIN_NEW_SALE
+  ADMIN_NEW_USER
+  ADMIN_NEW_MESSAGE
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  FAILED
+  BOUNCED
+}
+
 // ========================================
 // MODELOS
 // ========================================
@@ -94,6 +124,7 @@ model User {
   emailVerifications EmailVerification[]
   couponsUsed        CouponUsage[]
   notifications      Notification[]
+  emailLogs          EmailLog[]
 
   @@map("users")
 }
@@ -459,13 +490,19 @@ model AuditLog {
 }
 
 model EmailLog {
-  id       String   @id @default(uuid())
-  to       String
-  subject  String
-  template String
-  status   String // sent, failed, bounced
-  error    String?  @db.Text
-  sentAt   DateTime @default(now())
+  id        String      @id @default(uuid())
+  userId    String?
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  to        String // Email destinatario
+  type      EmailType // Tipo de email
+  subject   String
+  status    EmailStatus @default(PENDING)
+  sentAt    DateTime?
+  openedAt  DateTime? // Tracking de apertura
+  clickedAt DateTime? // Tracking de clicks
+  error     String?     @db.Text
+  metadata  Json? // Datos adicionales (orderId, couponCode, etc.)
+  createdAt DateTime    @default(now())
 
   @@map("email_logs")
 }

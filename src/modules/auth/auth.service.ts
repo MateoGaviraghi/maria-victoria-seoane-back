@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { UsersService } from '../users/users.service';
+import { EmailsService } from '../emails/emails.service';
 import {
   RegisterDto,
   LoginDto,
@@ -28,6 +29,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private usersService: UsersService,
+    private emailsService: EmailsService,
   ) {}
 
   // ==========================================
@@ -60,9 +62,20 @@ export class AuthService {
     });
 
     // Crear token de verificación de email
-    await this.createEmailVerificationToken(user.id);
+    const verificationToken = await this.createEmailVerificationToken(user.id);
 
-    // TODO: Enviar email de verificación
+    // Enviar email de verificación
+    try {
+      await this.emailsService.sendVerificationEmail(
+        user.email,
+        user.firstName,
+        verificationToken,
+        user.id,
+      );
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      // No bloqueamos el registro si falla el email
+    }
 
     // Generar tokens
     const tokens = await this.generateTokens(user.id, user.email, user.role);
@@ -270,8 +283,17 @@ export class AuthService {
       },
     });
 
-    // TODO: Enviar email con link de reset
-    // const resetUrl = `${this.configService.get('frontend.url')}/reset-password?token=${token}`;
+    // Enviar email con link de reset
+    try {
+      await this.emailsService.sendPasswordResetEmail(
+        user.email,
+        user.firstName,
+        token,
+        user.id,
+      );
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+    }
   }
 
   // ==========================================
@@ -357,6 +379,7 @@ export class AuthService {
   async verifyEmail(token: string): Promise<void> {
     const verification = await this.prisma.emailVerification.findUnique({
       where: { token },
+      include: { user: true },
     });
 
     if (!verification) {
@@ -381,6 +404,17 @@ export class AuthService {
         data: { usedAt: new Date() },
       }),
     ]);
+
+    // Enviar email de bienvenida
+    try {
+      await this.emailsService.sendWelcomeEmail(
+        verification.user.email,
+        verification.user.firstName,
+        verification.user.id,
+      );
+    } catch (error) {
+      console.error('Error sending welcome email:', error);
+    }
   }
 
   // ==========================================

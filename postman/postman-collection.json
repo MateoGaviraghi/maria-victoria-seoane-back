@@ -1,0 +1,510 @@
+{
+  "info": {
+    "name": "Fase 2 - Sistema de Emails y Configuración",
+    "description": "Endpoints del sistema de emails automatizados y configuración del sitio",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "email_log_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth - Login (para obtener token)",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const res = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', res.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Hacer login como admin para obtener el token de acceso. El token se guarda automáticamente."
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚙️ Site Config - Configuración del Sitio",
+      "item": [
+        {
+          "name": "Get All Configs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/site-config",
+              "host": ["{{baseUrl}}"],
+              "path": ["site-config"]
+            },
+            "description": "Obtiene todas las configuraciones del sitio"
+          }
+        },
+        {
+          "name": "Get Email Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/site-config/emails/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["site-config", "emails", "settings"]
+            },
+            "description": "Obtiene la configuración actual de emails automáticos"
+          }
+        },
+        {
+          "name": "Update Email Settings",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cartAbandoned1hHours\": 1,\n  \"cartAbandoned24hHours\": 24,\n  \"cartAbandoned72hHours\": 72,\n  \"firstCouponDiscount\": 10,\n  \"secondCouponDiscount\": 15,\n  \"cartAbandonedEnabled\": true,\n  \"birthdayEmailsEnabled\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/site-config/emails/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["site-config", "emails", "settings"]
+            },
+            "description": "Actualiza los intervalos de carrito abandonado y descuentos de cupones"
+          }
+        },
+        {
+          "name": "Get Config by Key",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/site-config/EMAIL_CONFIG",
+              "host": ["{{baseUrl}}"],
+              "path": ["site-config", "EMAIL_CONFIG"]
+            },
+            "description": "Obtiene una configuración específica por su clave"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📧 Emails - Sistema de Emails",
+      "item": [
+        {
+          "name": "Get Email Logs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 && pm.response.json().data.logs.length > 0) {",
+                  "    const firstLog = pm.response.json().data.logs[0];",
+                  "    pm.collectionVariables.set('email_log_id', firstLog.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/emails/logs?page=1&limit=20&type=&status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número de página"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Emails por página"
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "Filtrar por tipo"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Filtrar por estado"
+                }
+              ]
+            },
+            "description": "Obtiene el historial de emails enviados con paginación y filtros"
+          }
+        },
+        {
+          "name": "Get Email Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/emails/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "stats"]
+            },
+            "description": "Obtiene estadísticas generales de emails"
+          }
+        },
+        {
+          "name": "Send Test - Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"VERIFICATION\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de verificación de prueba"
+          }
+        },
+        {
+          "name": "Send Test - Welcome Email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"WELCOME\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de bienvenida de prueba"
+          }
+        },
+        {
+          "name": "Send Test - Purchase Confirmed",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PURCHASE_CONFIRMED\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de confirmación de compra de prueba"
+          }
+        },
+        {
+          "name": "Send Test - Course Access",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"COURSE_ACCESS\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email con credenciales de acceso a curso de prueba"
+          }
+        },
+        {
+          "name": "Send Test - Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PASSWORD_RESET\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de recuperación de contraseña de prueba"
+          }
+        },
+        {
+          "name": "Send Test - Cart Abandoned 1h",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"CART_ABANDONED_1H\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de carrito abandonado (1 hora) de prueba"
+          }
+        },
+        {
+          "name": "Send Test - Cart Abandoned 24h",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"CART_ABANDONED_24H\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de carrito abandonado (24 horas con cupón) de prueba"
+          }
+        },
+        {
+          "name": "Send Test - Cart Abandoned 72h",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"CART_ABANDONED_72H\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de carrito abandonado (72 horas con cupón mayor) de prueba"
+          }
+        },
+        {
+          "name": "Send Test - New Coupon",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"NEW_COUPON\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de nuevo cupón disponible de prueba"
+          }
+        },
+        {
+          "name": "Send Test - Coupon Expiring",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"COUPON_EXPIRING\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de cupón por vencer de prueba"
+          }
+        },
+        {
+          "name": "Send Test - Birthday",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"BIRTHDAY\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de cumpleaños de prueba"
+          }
+        },
+        {
+          "name": "Send Test - New Course",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"NEW_COURSE\",\n  \"to\": \"gaviraghimateo@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "test"]
+            },
+            "description": "Envía un email de nuevo curso disponible de prueba"
+          }
+        },
+        {
+          "name": "Send Campaign - Custom",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"NEW_COURSE\",\n  \"subject\": \"¡Nuevo curso disponible!\",\n  \"recipients\": [\n    \"gaviraghimateo@gmail.com\"\n  ],\n  \"data\": {\n    \"courseName\": \"React desde Cero\",\n    \"courseUrl\": \"https://mariavictoriaseoane.com/cursos/react\",\n    \"courseDescription\": \"Aprende React desde los fundamentos\",\n    \"discountCode\": \"REACT20\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emails/campaign",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "campaign"]
+            },
+            "description": "Envía una campaña de email masiva a múltiples destinatarios"
+          }
+        },
+        {
+          "name": "Resend Email by Log ID",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/emails/{{email_log_id}}/resend",
+              "host": ["{{baseUrl}}"],
+              "path": ["emails", "{{email_log_id}}", "resend"]
+            },
+            "description": "Reenvía un email usando el ID del log"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { OrdersService } from '../orders/orders.service';
+import { EmailsService } from '../emails/emails.service';
 import {
   PaymentFilterDto,
   MercadoPagoWebhookDto,
@@ -44,6 +45,7 @@ export class PaymentsService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly ordersService: OrdersService,
+    private readonly emailsService: EmailsService,
   ) {}
 
   // ==========================================
@@ -210,8 +212,42 @@ export class PaymentsService {
 
     this.logger.log(`Orden ${orderId} completada exitosamente`);
 
-    // TODO: Enviar email de confirmación
-    // await this.emailService.sendPurchaseConfirmation(order);
+    // Enviar email de confirmación de compra
+    try {
+      const courses = order.items.map((item) => ({
+        title: item.title,
+        price: parseFloat(item.price.toString()),
+      }));
+
+      await this.emailsService.sendPurchaseConfirmedEmail(
+        order.user.email,
+        order.user.firstName,
+        order.id,
+        courses,
+        parseFloat(order.subtotal.toString()),
+        parseFloat(order.discountAmount.toString()),
+        parseFloat(order.total.toString()),
+        order.userId,
+      );
+
+      // Enviar email con acceso al curso
+      const courseAccess = order.items.map((item) => ({
+        title: item.title,
+        accessUrl: `${this.configService.get('FRONTEND_URL')}/my-courses/${item.courseId}`,
+        // TODO: Generar credenciales reales si se usa plataforma externa
+        username: order.user.email,
+        password: 'Ver en plataforma',
+      }));
+
+      await this.emailsService.sendCourseAccessEmail(
+        order.user.email,
+        order.user.firstName,
+        courseAccess,
+        order.userId,
+      );
+    } catch (error) {
+      this.logger.error('Error sending confirmation emails:', error);
+    }
   }
 
   // ==========================================

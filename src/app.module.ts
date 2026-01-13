@@ -17,6 +17,8 @@ import { CouponsModule } from './modules/coupons/coupons.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { EmailsModule } from './modules/emails/emails.module';
+import { SiteConfigModule } from './modules/site-config/site-config.module';
 import { JwtAuthGuard, RolesGuard } from './common/guards';
 import { AllExceptionsFilter } from './common/filters';
 import { TransformInterceptor } from './common/interceptors';
@@ -50,6 +52,12 @@ import { TransformInterceptor } from './common/interceptors';
     CheckoutModule,
     OrdersModule,
     PaymentsModule,
+
+    // Módulos de Comunicación
+    EmailsModule,
+
+    // Configuración del sitio (debe ir antes de EmailsModule si usa cron)
+    SiteConfigModule,
   ],
   controllers: [AppController],
   providers: [
