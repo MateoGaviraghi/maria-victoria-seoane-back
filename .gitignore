@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 
+documentacion-front/
 # Build
 dist/
 build/
