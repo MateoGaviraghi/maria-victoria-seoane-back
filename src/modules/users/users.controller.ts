@@ -56,6 +56,7 @@ export class UsersController {
     @Body() dto: UpdateUserDto,
   ) {
     // Eliminar campos que el usuario no puede modificar
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { role: _role, ...safeData } = dto as UpdateUserDto & {
       role?: unknown;
     };

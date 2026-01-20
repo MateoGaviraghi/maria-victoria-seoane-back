@@ -19,14 +19,14 @@ export class TransformInterceptor<T> implements NestInterceptor<
   Response<T>
 > {
   intercept(
-    context: ExecutionContext,
-    next: CallHandler,
+    _context: ExecutionContext,
+    next: CallHandler<T>,
   ): Observable<Response<T>> {
     return next.handle().pipe(
-      map((data) => {
+      map((data: T): Response<T> => {
         // Si ya tiene el formato de respuesta, no lo transformamos
         if (data && typeof data === 'object' && 'success' in data) {
-          return data;
+          return data as unknown as Response<T>;
         }
 
         return {
